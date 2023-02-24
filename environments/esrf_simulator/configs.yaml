@@ -1,0 +1,8 @@
+---
+name: esrf-simulator
+version: "0.1"
+dependencies:
+  - numpy
+  - badger-opt
+interface:
+  - tango_simulator
