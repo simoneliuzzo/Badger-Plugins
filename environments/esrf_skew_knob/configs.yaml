@@ -5,4 +5,4 @@ dependencies:
   - numpy
   - badger-opt
 interface:
-  - tango_mock
+  - tango_simulator
