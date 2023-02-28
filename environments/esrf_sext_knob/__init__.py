@@ -36,10 +36,11 @@ class Environment(environment.Environment):
     name = 'esrf_sext_knobs'
 
     def __init__(self, interface: Interface, params):
-        self.limits_knobs = { name : [-1, 1] for name in Environment.knobs.get_names()}
+        self.limits_knobs = { name : [-10, 10] for name in Environment.knobs.get_names()}
         self.current_vars = []
         super().__init__(interface, params)
         self.initial_sext = self.interface.get_value(attributename='srmag/m-s/all/CorrectionStrengths')
+        self.cur_0 = self.interface.get_value('srdiag/beam-current/total/Current')
 
     def _get_vrange(self, var):
         return self.limits_knobs[var]
@@ -101,7 +102,8 @@ class Environment(environment.Environment):
             _totloss = []
             for i in range(n_acq):
                 # get acquisition i
-                _totloss.append(self.interface.get_value('srdiag/blm/all/TotalLoss'))
+                cur = self.interface.get_value('srdiag/beam-current/total/Current')
+                _totloss.append(self.interface.get_value('srdiag/blm/all/TotalLoss')*(self.cur_0/cur)**2)
                 # wait before next acquisition
                 if n_acq > 1:
                     time.sleep(dt_acq)
@@ -114,7 +116,8 @@ class Environment(environment.Environment):
             _LT = []
             for i in range(n_acq):
                 # get acquisition i
-                _LT.append(self.interface.get_value('srdiag/bpm/lifetime/Lifetime')/3600)  # convert to h
+                cur = self.interface.get_value('srdiag/beam-current/total/Current')
+                _LT.append(self.interface.get_value('srdiag/bpm/lifetime/Lifetime')/3600*cur/self.cur_0)  # convert to h
                 # wait before next acquisition
                 if n_acq > 1:
                     time.sleep(dt_acq)
